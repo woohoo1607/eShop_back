@@ -2,32 +2,29 @@ const bodyParser = require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({extended: false});
 const toServer = require('./toServer');
 
-
-const user = (app) => {
-    app.get("/users", function (request,response) {
+const categorys = (app) => {
+    app.get("/categorys", function (request, response) {
         const query = {
-            text: 'SELECT * from Users  ORDER BY id',
+            text: 'SELECT * from categorys ORDER BY id',
             values: []
         };
-       toServer(query).then(res => {
-           response.status(200);
-           response.json({result: res.rows, status: 1});
-       } ).catch(e=> {
-           response.send("error");
-       });
-
+        toServer(query).then(res => {
+            response.status(200);
+            response.json({result: res.rows, status: 1});
+        } ).catch(e=> {
+            response.send("error");
+        });
     });
-
-    app.get("/users/:id", function (request,response) {
+    app.get("/categorys/:id", function (request, response) {
         let id = request.params.id;
         const query = {
-            text: 'SELECT * from Users WHERE id = $1',
+            text: 'SELECT * from categorys WHERE id = $1',
             values: [id]
         };
         toServer(query).then(res => {
             response.status(200);
             if (res.rowCount === 0) {
-                response.send({message: 'User is not found', status: 0});
+                response.json({message: 'Category is not found', status: 0});
             } else {
                 response.json({result: res.rows, status: 1});
             }
@@ -35,25 +32,24 @@ const user = (app) => {
             response.send("error");
         });
     });
-
-    app.post("/users", urlencodedParser, function (request, response) {
+    app.post("/categorys", urlencodedParser, function (request, response) {
         let data = request.body;
         const queryCHECK = {
-            text: 'SELECT * from users WHERE login=$1 OR phonenumber=$2 OR email=$3',
-            values: [data.login, data.phonenumber, data.email ]
+            text: 'SELECT * from categorys WHERE title=$1',
+            values: [data.title]
         };
         const query = {
-            text: 'INSERT INTO users (login, pass, firstname, surname, phonenumber, email) VALUES ($1, $2, $3, $4, $5, $6)',
-            values: [data.login, data.pass, data.firstname, data.surname, data.phonenumber, data.email]
+            text: 'INSERT INTO categorys (title, description) VALUES ($1, $2)',
+            values: [data.title, data.description]
         };
         toServer(queryCHECK).then(res => {
             if (res.rowCount === 0) {
                 toServer(query).then(res => {
                     response.status(200);
                     if (res.rowCount === 0) {
-                        response.json({message: 'User not added', status: 0});
+                        response.json({message: 'Category not added', status: 0});
                     } else {
-                        response.json({message: 'User added', status: 1});
+                        response.json({message: 'Category added', status: 1});
                     }
                 } ).catch(e=> {
                     console.log(e);
@@ -61,66 +57,61 @@ const user = (app) => {
                 });
             } else {
                 response.status(200);
-                response.json({message: 'login or phonenumber or email are not UNIQUE', status: 0});
+                response.json({message: 'Title is not UNIQUE', status: 0});
             }
         } ).catch(e=> {
             console.log(e);
             response.send("error");
         });
     });
-
-    app.delete("/users", urlencodedParser, function (request, response) {
+    app.delete("/categorys", urlencodedParser, function (request, response) {
         let data = request.body;
         const query = {
-            text: 'DELETE FROM users WHERE id = $1',
+            text: 'DELETE FROM categorys WHERE id = $1',
             values: [data.id]
         };
         toServer(query).then(res => {
             response.status(200);
             if (res.rowCount === 0) {
-                response.json({message: 'User is not found', status: 0});
+                response.json({message: 'Category is not found', status: 0});
             } else {
-                response.json({message: 'User removed', status: 1});
+                response.json({message: 'Category removed', status: 1});
             }
         } ).catch(e=> {
             response.send("error");
         });
     });
-
-    app.put("/users", urlencodedParser, function (request, response) {
+    app.put("/categorys", urlencodedParser, function (request, response) {
         let data = request.body;
         const queryCHECK = {
-            text: 'SELECT * from users WHERE login=$1 OR phonenumber=$2 OR email=$3',
-            values: [data.login, data.phonenumber, data.email ]
+            text: 'SELECT * from categorys WHERE title=$1',
+            values: [data.title]
         };
         const query = {
-            text: 'UPDATE users SET id=$1, login=$2, pass=$3, firstname=$4, surname=$5, phonenumber=$6, email=$7 WHERE id = $1',
-            values: [data.id, data.login, data.pass, data.firstname, data.surname, data.phonenumber, data.email]
+            text: 'UPDATE categorys SET id=$1, title=$2, description=$3 WHERE id = $1',
+            values: [data.id, data.title, data.description]
         };
         toServer(queryCHECK).then(res => {
             if (res.rowCount === 0|| res.rowCount===1 && res.rows[0].id == data.id) {
                 toServer(query).then(res => {
                     response.status(200);
                     if (res.rowCount === 0) {
-                        response.json({message: 'User not updated', status: 0});
+                        response.json({message: 'Category not updated', status: 0});
                     } else {
-                        response.json({message: 'User updated', status: 1});
+                        response.json({message: 'Category updated', status: 1});
                     }
                 } ).catch(e=> {
                     console.log(e);
                     response.send("error");
                 });
             } else {
-                console.log(res.rows[0].id == data.id);
                 response.status(200);
-                response.json({message: 'login or phonenumber or email are not UNIQUE', status: 0});
+                response.json({message: 'Title is not UNIQUE', status: 0});
             }
         } ).catch(e=> {
             console.log(e);
             response.send("error");
         });
     });
-
 };
-
-module.exports = user;
+module.exports = categorys;
