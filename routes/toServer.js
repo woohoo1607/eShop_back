@@ -14,7 +14,6 @@ const toServer = async (query) => {
             return client
                 .query(query)
                 .then(res => {
-                    console.log(res);
                     client.release();
                     return res;
                 })

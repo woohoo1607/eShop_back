@@ -6,15 +6,30 @@ const toServer = require('./toServer');
 const user = (app) => {
     app.get("/users", function (request,response) {
         const query = {
-            text: 'SELECT * from Users  ORDER BY id',
+            text: 'SELECT * from Users ORDER BY id',
             values: []
         };
-       toServer(query).then(res => {
+        const queryCount = {
+            text: 'SELECT COUNT (*) from Users',
+            values: []
+        };
+        let getUsers = async () => {
+            try {
+                let users = await toServer(query);
+                let count = await toServer(queryCount);
+                response.status(200);
+                response.json({result: users.rows, count: +count.rows[0].count, status: 1});
+            } catch(e) {
+                response.send("error");
+            }
+        };
+        getUsers();
+       /*toServer(query).then(res => {
            response.status(200);
            response.json({result: res.rows, status: 1});
        } ).catch(e=> {
            response.send("error");
-       });
+       });*/
 
     });
 
