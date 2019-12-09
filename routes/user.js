@@ -5,10 +5,20 @@ const toServer = require('./toServer');
 
 const user = (app) => {
     app.get("/users", function (request,response) {
-        const query = {
-            text: 'SELECT * from Users ORDER BY id',
-            values: []
-        };
+        let query;
+        if (request.query.page) {
+            let page = (request.query.page-1)*10;
+            (page<0) ? page = 0 : page=page;
+            query = {
+                text: 'SELECT * from Users ORDER BY id LIMIT 10 OFFSET $1',
+                values: [page]
+            };
+        } else {
+            query = {
+                text: 'SELECT * from Users ORDER BY id LIMIT 10 OFFSET 0',
+                values: []
+            };
+        }
         const queryCount = {
             text: 'SELECT COUNT (*) from Users',
             values: []
