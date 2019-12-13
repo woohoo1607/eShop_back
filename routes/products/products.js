@@ -1,11 +1,12 @@
 const bodyParser = require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({extended: false});
-const toServer = require('./toServer');
+const toServer = require('../toServer');
 
-const categorys = (app) => {
-    app.get("/categorys", function (request, response) {
+const products = (app) => {
+    app.get("/products", function (request, response) {
         const query = {
-            text: 'SELECT * from categorys ORDER BY id',
+            //text: 'SELECT * from products ORDER BY id',
+            text: 'SELECT products.id, products.title, products.categoryid, products.price, products.manufacturer, products.quantity, products.guarantee, products.description, categorys.title AS category_name, categorys.description AS category_description from products FULL OUTER JOIN categorys ON products.categoryid = categorys.id',
             values: []
         };
         toServer(query).then(res => {
@@ -15,16 +16,16 @@ const categorys = (app) => {
             response.send("error");
         });
     });
-    app.get("/categorys/:id", function (request, response) {
+    app.get("/products/:id", function (request, response) {
         let id = request.params.id;
         const query = {
-            text: 'SELECT * from categorys WHERE id = $1',
+            text: 'SELECT * from products WHERE id = $1',
             values: [id]
         };
         toServer(query).then(res => {
             response.status(200);
             if (res.rowCount === 0) {
-                response.json({message: 'Category is not found', status: 0});
+                response.json({message: 'Products is not found', status: 0});
             } else {
                 response.json({result: res.rows, status: 1});
             }
@@ -32,24 +33,24 @@ const categorys = (app) => {
             response.send("error");
         });
     });
-    app.post("/categorys", urlencodedParser, function (request, response) {
+    app.post("/products", urlencodedParser, function (request, response) {
         let data = request.body;
         const queryCHECK = {
-            text: 'SELECT * from categorys WHERE title=$1',
+            text: 'SELECT * from products WHERE title=$1',
             values: [data.title]
         };
         const query = {
-            text: 'INSERT INTO categorys (title, description) VALUES ($1, $2)',
-            values: [data.title, data.description]
+            text: 'INSERT INTO products (title, categoryid, price, manufacturer, quantity, guarantee, description) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            values: [data.title, data.categoryid, data.price, data.manufacturer, data.quantity, data.guarantee, data.description]
         };
         toServer(queryCHECK).then(res => {
             if (res.rowCount === 0) {
                 toServer(query).then(res => {
                     response.status(200);
                     if (res.rowCount === 0) {
-                        response.json({message: 'Category not added', status: 0});
+                        response.json({message: 'Products not added', status: 0});
                     } else {
-                        response.json({message: 'Category added', status: 1});
+                        response.json({message: 'Products added', status: 1});
                     }
                 } ).catch(e=> {
                     console.log(e);
@@ -64,41 +65,41 @@ const categorys = (app) => {
             response.send("error");
         });
     });
-    app.delete("/categorys", urlencodedParser, function (request, response) {
+    app.delete("/products", urlencodedParser, function (request, response) {
         let data = request.body;
         const query = {
-            text: 'DELETE FROM categorys WHERE id = $1',
+            text: 'DELETE FROM products WHERE id = $1',
             values: [data.id]
         };
         toServer(query).then(res => {
             response.status(200);
             if (res.rowCount === 0) {
-                response.json({message: 'Category is not found', status: 0});
+                response.json({message: 'Products is not found', status: 0});
             } else {
-                response.json({message: 'Category removed', status: 1});
+                response.json({message: 'Products removed', status: 1});
             }
         } ).catch(e=> {
             response.send("error");
         });
     });
-    app.put("/categorys", urlencodedParser, function (request, response) {
+    app.put("/products", urlencodedParser, function (request, response) {
         let data = request.body;
         const queryCHECK = {
-            text: 'SELECT * from categorys WHERE title=$1',
+            text: 'SELECT * from products WHERE title=$1',
             values: [data.title]
         };
         const query = {
-            text: 'UPDATE categorys SET id=$1, title=$2, description=$3 WHERE id = $1',
-            values: [data.id, data.title, data.description]
+            text: 'UPDATE products SET id=$1, title=$2, categoryid=$3, price=$4, manufacturer=$5, quantity=$6, guarantee=$7, description=$8 WHERE id = $1',
+            values: [data.id, data.title, data.categoryid, data.price, data.manufacturer, data.quantity, data.guarantee, data.description]
         };
         toServer(queryCHECK).then(res => {
-            if (res.rowCount === 0|| res.rowCount===1 && res.rows[0].id == data.id) {
+            if (res.rowCount === 0 || res.rowCount===1 && res.rows[0].id == data.id) {
                 toServer(query).then(res => {
                     response.status(200);
                     if (res.rowCount === 0) {
-                        response.json({message: 'Category not updated', status: 0});
+                        response.json({message: 'Products not updated', status: 0});
                     } else {
-                        response.json({message: 'Category updated', status: 1});
+                        response.json({message: 'Products updated', status: 1});
                     }
                 } ).catch(e=> {
                     console.log(e);
@@ -114,4 +115,4 @@ const categorys = (app) => {
         });
     });
 };
-module.exports = categorys;
+module.exports = products;

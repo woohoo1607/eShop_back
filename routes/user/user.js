@@ -1,6 +1,8 @@
+const userDatabaseManager = require ('./userDatabaseManager');
+
 const bodyParser = require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({extended: false});
-const toServer = require('./toServer');
+const toServer = require('../toServer');
 
 
 const user = (app) => {
@@ -114,6 +116,7 @@ const user = (app) => {
 
     app.put("/users", urlencodedParser, function (request, response) {
         let data = request.body;
+        //const query = userDatabaseManager.update(data);
         const queryCHECK = {
             text: 'SELECT * from users WHERE login=$1 OR phonenumber=$2 OR email=$3',
             values: [data.login, data.phonenumber, data.email ]
@@ -136,7 +139,6 @@ const user = (app) => {
                     response.send("error");
                 });
             } else {
-                console.log(res.rows[0].id == data.id);
                 response.status(200);
                 response.json({message: 'login or phonenumber or email are not UNIQUE', status: 0});
             }
