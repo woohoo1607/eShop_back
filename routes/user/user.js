@@ -36,13 +36,6 @@ const user = (app) => {
             }
         };
         getUsers();
-       /*toServer(query).then(res => {
-           response.status(200);
-           response.json({result: res.rows, status: 1});
-       } ).catch(e=> {
-           response.send("error");
-       });*/
-
     });
 
     app.get("/users/:id", function (request,response) {
@@ -96,7 +89,7 @@ const user = (app) => {
         });
     });
 
-    app.delete("/users", urlencodedParser, function (request, response) {
+    app.post("/delete/user", urlencodedParser, function (request, response) {
         let data = request.body;
         const query = {
             text: 'DELETE FROM users WHERE id = $1',
@@ -116,15 +109,13 @@ const user = (app) => {
 
     app.put("/users", urlencodedParser, function (request, response) {
         let data = request.body;
-        //const query = userDatabaseManager.update(data);
+        const query = userDatabaseManager.update(data);
+
         const queryCHECK = {
             text: 'SELECT * from users WHERE login=$1 OR phonenumber=$2 OR email=$3',
             values: [data.login, data.phonenumber, data.email ]
         };
-        const query = {
-            text: 'UPDATE users SET id=$1, login=$2, pass=$3, firstname=$4, surname=$5, phonenumber=$6, email=$7 WHERE id = $1',
-            values: [data.id, data.login, data.pass, data.firstname, data.surname, data.phonenumber, data.email]
-        };
+
         toServer(queryCHECK).then(res => {
             if (res.rowCount === 0|| res.rowCount===1 && res.rows[0].id == data.id) {
                 toServer(query).then(res => {

@@ -3,7 +3,7 @@ const urlencodedParser = bodyParser.urlencoded({extended: false});
 const toServer = require('../toServer');
 
 const categories = (app) => {
-    app.get("/categorys", function (request, response) {
+    app.get("/categories", function (request, response) {
         const query = {
             text: 'SELECT * from categorys ORDER BY id',
             values: []
@@ -15,7 +15,7 @@ const categories = (app) => {
             response.send("error");
         });
     });
-    app.get("/categorys/:id", function (request, response) {
+    app.get("/categories/:id", function (request, response) {
         let id = request.params.id;
         const query = {
             text: 'SELECT * from categorys WHERE id = $1',
@@ -32,7 +32,7 @@ const categories = (app) => {
             response.send("error");
         });
     });
-    app.post("/categorys", urlencodedParser, function (request, response) {
+    app.post("/categories", urlencodedParser, function (request, response) {
         let data = request.body;
         const queryCHECK = {
             text: 'SELECT * from categorys WHERE title=$1',
@@ -64,7 +64,7 @@ const categories = (app) => {
             response.send("error");
         });
     });
-    app.delete("/categorys", urlencodedParser, function (request, response) {
+    app.delete("/categories", urlencodedParser, function (request, response) {
         let data = request.body;
         const query = {
             text: 'DELETE FROM categorys WHERE id = $1',
@@ -81,7 +81,7 @@ const categories = (app) => {
             response.send("error");
         });
     });
-    app.put("/categorys", urlencodedParser, function (request, response) {
+    app.put("/categories", urlencodedParser, function (request, response) {
         let data = request.body;
         const queryCHECK = {
             text: 'SELECT * from categorys WHERE title=$1',
